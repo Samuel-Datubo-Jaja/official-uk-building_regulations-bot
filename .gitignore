@@ -1,0 +1,4 @@
+main_chroma_data/
+*.zip
+__pycache__/
+.env
