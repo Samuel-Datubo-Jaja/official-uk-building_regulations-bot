@@ -167,9 +167,9 @@ def init_rag():
     try:
         # Check if main_chroma_data exists
         if not os.path.exists("./main_chroma_data"):
-            download_vectorstore()
-            #  st.error("Error: main_chroma_data directory not found. Please check the directory path.")
-            # return None, None
+            #download_vectorstore()
+            st.error("Error: main_chroma_data directory not found. Please check the directory path.")
+            return None, None
 
         # Initialize embeddings
         try:
