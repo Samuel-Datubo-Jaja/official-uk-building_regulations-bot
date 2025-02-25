@@ -141,13 +141,14 @@
 # st.markdown("---")
 # st.markdown("*This is a research project. Always verify information with official sources.*")
 
-# Fix SQLite version issue on Streamlit Cloud
-try:
-    __import__('pysqlite3')
-    import sys
-    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-except ImportError:
-    pass
+
+# SQLite compatibility fix for Chromadb
+import sqlite3
+print(f"SQLite version: {sqlite3.sqlite_version}")
+
+# Try alternative vector store approach if SQLite version is too old
+import os
+os.environ["LANGCHAIN_CHROMA_ALLOW_DEPRECATED_BACKEND"] = "true"
 
 import streamlit as st
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -189,6 +190,17 @@ def init_rag():
             return None, None
 
         # Initialize vector store
+        # try:
+        #     vectorstore = Chroma(
+        #         collection_name="main_construction_rag",
+        #         embedding_function=embeddings,
+        #         persist_directory="./main_chroma_data"
+        #     )
+        # except Exception as e:
+        #     st.error(f"Error initializing vector store: {str(e)}")
+        #     return None, None
+        
+        # Initialize vector store
         try:
             vectorstore = Chroma(
                 collection_name="main_construction_rag",
@@ -196,8 +208,14 @@ def init_rag():
                 persist_directory="./main_chroma_data"
             )
         except Exception as e:
-            st.error(f"Error initializing vector store: {str(e)}")
-            return None, None
+            st.warning("Using deprecated backend due to SQLite version constraints")
+            # Use alternative initialization if needed
+            from langchain_community.vectorstores import Chroma as ChromaDeprecated
+            vectorstore = ChromaDeprecated(
+                collection_name="main_construction_rag",
+                embedding_function=embeddings,
+                persist_directory="./main_chroma_data"
+            )
 
         # Check if GROQ API key is set
         groq_api_key = os.getenv("GROQ_API_KEY")
