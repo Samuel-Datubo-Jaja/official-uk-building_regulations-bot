@@ -141,6 +141,13 @@
 # st.markdown("---")
 # st.markdown("*This is a research project. Always verify information with official sources.*")
 
+# Fix SQLite version issue on Streamlit Cloud
+try:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass
 
 import streamlit as st
 from langchain_huggingface import HuggingFaceEmbeddings
